@@ -1,18 +1,63 @@
-import { Link } from 'react-router-dom';
-import { useState } from 'react';
+import { Link, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import axios from "axios";
 
 export default function SignupPage() {
-  const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const API_URL =
+    import.meta.env.VITE_API_URL || "https://tunehive-nw51.onrender.com";
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Username:', username);
-    console.log('Email:', email);
-    console.log('Password:', password);
-    console.log('Confirm Password:', confirmPassword);
+    setError("");
+
+    if (!username || !email || !password || !confirmPassword) {
+      setError("⚠️ Please fill in all fields.");
+      return;
+    }
+    if (password !== confirmPassword) {
+      setError("❌ Passwords do not match.");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const res = await axios.post(
+        `${API_URL}/api/auth/register`,
+        { username, email, password },
+        { withCredentials: true }
+      );
+
+      if (res.data.success) {
+        alert("✅ Signup successful! You can now log in.");
+        navigate("/login");
+      } else {
+        setError(res.data.message || "Signup failed. Please try again.");
+      }
+    } catch (err) {
+      console.error(err);
+      if (err.response) {
+        if (err.response.status === 400) {
+          setError(err.response.data.message || "Invalid input.");
+        } else if (err.response.status === 500) {
+          setError("⚠️ Server error. Please try again later.");
+        } else {
+          setError("❌ Something went wrong.");
+        }
+      } else {
+        setError("🚫 Cannot connect to the server. Check your network.");
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -20,19 +65,31 @@ export default function SignupPage() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <div className="inline-block mb-4">
-            <img 
-              src="https://i.pinimg.com/originals/91/22/60/912260373c0d9bee4d5bbf80d1af8033.jpg" 
-              alt="TuneHive" 
+            <img
+              src="https://i.pinimg.com/originals/91/22/60/912260373c0d9bee4d5bbf80d1af8033.jpg"
+              alt="TuneHive"
               className="w-24 h-24 rounded-full object-cover"
             />
           </div>
           <h1 className="text-white text-4xl font-bold">TuneHive</h1>
-          <p className="text-neutral-400 text-sm mt-2">Sign up to start listening</p>
+          <p className="text-neutral-400 text-sm mt-2">
+            Sign up to start listening
+          </p>
         </div>
+
+
+        {error && (
+          <div className="bg-red-500/10 border border-red-500 text-red-400 px-4 py-3 rounded-lg text-sm mb-4 text-center">
+            {error}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="username" className="block text-white text-sm font-medium mb-2">
+            <label
+              htmlFor="username"
+              className="block text-white text-sm font-medium mb-2"
+            >
               Username
             </label>
             <input
@@ -46,7 +103,10 @@ export default function SignupPage() {
           </div>
 
           <div>
-            <label htmlFor="email" className="block text-white text-sm font-medium mb-2">
+            <label
+              htmlFor="email"
+              className="block text-white text-sm font-medium mb-2"
+            >
               Email
             </label>
             <input
@@ -60,7 +120,10 @@ export default function SignupPage() {
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-white text-sm font-medium mb-2">
+            <label
+              htmlFor="password"
+              className="block text-white text-sm font-medium mb-2"
+            >
               Password
             </label>
             <input
@@ -74,7 +137,10 @@ export default function SignupPage() {
           </div>
 
           <div>
-            <label htmlFor="confirmPassword" className="block text-white text-sm font-medium mb-2">
+            <label
+              htmlFor="confirmPassword"
+              className="block text-white text-sm font-medium mb-2"
+            >
               Confirm Password
             </label>
             <input
@@ -87,11 +153,16 @@ export default function SignupPage() {
             />
           </div>
 
-          <button 
+          <button
             type="submit"
-            className="w-full bg-purple-600 hover:bg-purple-500 text-white font-semibold py-3 rounded-full transition-colors"
+            disabled={loading}
+            className={`w-full ${
+              loading
+                ? "bg-purple-800 cursor-not-allowed"
+                : "bg-purple-600 hover:bg-purple-500"
+            } text-white font-semibold py-3 rounded-full transition-colors`}
           >
-            Sign Up
+            {loading ? "Creating account..." : "Sign Up"}
           </button>
         </form>
 
@@ -103,7 +174,10 @@ export default function SignupPage() {
           <p className="text-neutral-400 text-sm mb-4">
             Already have an account?
           </p>
-          <Link to="/login" className="block w-full border border-neutral-700 hover:border-purple-500 text-white font-semibold py-3 rounded-full transition-colors text-center">
+          <Link
+            to="/login"
+            className="block w-full border border-neutral-700 hover:border-purple-500 text-white font-semibold py-3 rounded-full transition-colors text-center"
+          >
             Log in to TuneHive
           </Link>
         </div>

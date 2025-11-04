@@ -8,11 +8,6 @@ import authRoutes from "./routes/authRoutes.js";
 dotenv.config();
 const app = express();
 
-const allowedOrigins = [
-  "http://localhost:5173",
-  "https://tune-hive-git-main-arhans-projects-fdbbfd81.vercel.app"
-];
-
 app.use(cors({
     origin: [
       "http://localhost:5173",
