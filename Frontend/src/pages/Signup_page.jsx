@@ -1,6 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import axios from "axios";
+import toast from "react-hot-toast";
 
 export default function SignupPage() {
   const [username, setUsername] = useState("");
@@ -37,7 +38,7 @@ export default function SignupPage() {
       );
 
       if (res.data.success) {
-        alert("✅ Signup successful! You can now log in.");
+        toast.success(" Signup successful! You can now log in.");
         navigate("/login");
       } else {
         setError(res.data.message || "Signup failed. Please try again.");

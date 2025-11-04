@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-
+import toast from "react-hot-toast";
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -31,7 +31,7 @@ export default function Login() {
       );
 
       if (res.data.success) {
-        alert('✅ Login successful!');
+        toast.success(' Login successful!');
         navigate('/'); 
       } else {
         setError(res.data.message || 'Login failed. Please try again.');
