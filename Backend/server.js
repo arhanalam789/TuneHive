@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
-import connectToMongoDB from './config/MongoDB.js';
+import connectToMongoDB from './config/mongodb.js';
 import dotenv from 'dotenv';
 import authRoutes from './routes/authRoutes.js';
 
