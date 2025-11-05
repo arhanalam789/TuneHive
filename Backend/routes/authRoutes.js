@@ -3,9 +3,14 @@ import express from "express";
 const router = express.Router();
 
 import { registerUser, loginUser, logoutUser } from "../controllers/authController.js"
+import {sendOtp} from "../controllers/authController.js";
+import { verifyOtp } from "../controllers/authController.js";
+import { resetpassword } from "../controllers/authController.js";
 
 router.post('/register', registerUser);
 router.post('/login', loginUser);
 router.post('/logout', logoutUser);
-
+router.post('/verifyotp', verifyOtp);
+router.post('/sendotp', sendOtp);
+router.post('/resetpassword', resetpassword);
 export default router;

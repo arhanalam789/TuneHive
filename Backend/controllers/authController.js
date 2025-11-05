@@ -3,9 +3,17 @@ import User from '../models/userModel.js';
 import pkg from 'jsonwebtoken';
 const { sign: jwtsign } = pkg;
 import dotenv from 'dotenv';
-
+import nodemailer from 'nodemailer';
 
 dotenv.config();
+
+const transporter = nodemailer.createTransport({
+  service: 'Gmail',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
 
 export const registerUser = async (req, res) => {
   try {
@@ -77,4 +85,53 @@ export const logoutUser = (req, res) => {
     success: true,
     message: 'User logged out successfully',
   });
+};
+
+
+export const sendOtp = async (req, res) => {
+    const { email } = req.body; 
+    const user = await User.findOne({ email });
+    if (!user) {
+        return res.status(400).json({ success: false, message: 'User not found' });
+    }
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpExpiry = new Date(Date.now() + 10 * 60 * 1000);
+    user.otp = otp;
+    user.otpExpiry = otpExpiry;
+    await user.save();
+    await transporter.sendMail({
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: 'Your OTP Code',
+        text: `Your OTP code is ${otp}. It is valid for 5 minutes.`,
+    });
+
+    res.status(200).json({ success: true, message: 'OTP sent to email' });
+};
+
+export const verifyOtp = async (req, res) => {
+    const { email, otp } = req.body; 
+    const user = await User.findOne({ email }); 
+    if (!user) {
+        return res.status(400).json({ success: false, message: 'User not found' });
+    }
+    if (user.otp !== otp || user.otpExpiry < new Date()) {
+        return res.status(400).json({ success: false, message: 'Invalid or expired OTP' });
+    }
+    user.otp = null;
+    user.otpExpiry = null;
+    await user.save();
+    res.status(200).json({ success: true, message: 'OTP verified successfully' });
+};
+
+export const resetpassword = async (req, res) => {
+    const { email, newPassword } = req.body; 
+    const user = await User.findOne({ email });
+    if (!user) {
+        return res.status(400).json({ success: false, message: 'User not found' });
+    }
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+    await user.save();
+    res.status(200).json({ success: true, message: 'Password reset successfully' });
 };
