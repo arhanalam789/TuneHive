@@ -8,16 +8,20 @@ import authRoutes from "./routes/authRoutes.js";
 dotenv.config();
 const app = express();
 
-app.use(cors({
+app.use(
+  cors({
     origin: [
       "http://localhost:5173",
-      "https://tune-hive-git-main-arhans-projects-fdbbfd81.vercel.app"
+      "https://tune-hive-git-main-arhans-projects-fdbbfd81.vercel.app",
+      "https://tune-hive-six.vercel.app",
     ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
-  }));
+  })
+);
 
+app.options("*", cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
