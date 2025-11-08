@@ -8,12 +8,16 @@ import nodemailer from 'nodemailer';
 dotenv.config();
 
 const transporter = nodemailer.createTransport({
-  service: 'Gmail',
+  host: process.env.EMAIL_HOST,
+  port: process.env.EMAIL_PORT,
+  secure: false, 
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
 });
+
+
 
 export const registerUser = async (req, res) => {
   try {
@@ -102,10 +106,10 @@ export const sendOtp = async (req, res) => {
     user.otpExpiry = otpExpiry;
     await user.save();
 
-    // console.log("📧 Trying to send OTP to:", email);
+  
 
     await transporter.sendMail({
-      from: process.env.EMAIL_USER,
+      from: process.env.FROM_EMAIL,
       to: email,
       subject: "Your OTP Code",
       text: `Your OTP is ${otp}`,
