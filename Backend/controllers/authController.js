@@ -4,18 +4,18 @@ import pkg from 'jsonwebtoken';
 const { sign: jwtsign } = pkg;
 import dotenv from 'dotenv';
 import nodemailer from 'nodemailer';
-
+import axios from 'axios'
 dotenv.config();
 
-const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST,
-  port: process.env.EMAIL_PORT,
-  secure: false, 
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
+// const transporter = nodemailer.createTransport({
+//   host: process.env.EMAIL_HOST,
+//   port: process.env.EMAIL_PORT,
+//   secure: false, 
+//   auth: {
+//     user: process.env.EMAIL_USER,
+//     pass: process.env.EMAIL_PASS,
+//   },
+// });
 
 
 
@@ -107,13 +107,26 @@ export const sendOtp = async (req, res) => {
     await user.save();
 
   
+    await axios.post(
+      "https://api.brevo.com/v3/smtp/email",
+      {
+        sender: { name: "TuneHive", email: process.env.FROM_EMAIL },
+        to: [{ email }],
+        subject: "Your OTP Code - TuneHive 🎵",
+        htmlContent: `
+          <h2 style="color:#6C63FF;">TuneHive OTP Verification</h2>
+          <p>Your OTP is: <b>${otp}</b></p>
+          <p>This code is valid for 5 minutes.</p>
+        `,
+      },
+      {
+        headers: {
+          "api-key": process.env.BREVO_API_KEY,
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
-    await transporter.sendMail({
-      from: process.env.FROM_EMAIL,
-      to: email,
-      subject: "Your OTP Code",
-      text: `Your OTP is ${otp}`,
-    });
 
     res.status(200).json({ success: true, message: "OTP sent successfully!" });
   } catch (error) {
