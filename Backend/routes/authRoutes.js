@@ -10,7 +10,7 @@ import { resetpassword } from "../controllers/authController.js";
 router.post('/register', registerUser);
 router.post('/login', loginUser);
 router.post('/logout', logoutUser);
-router.post('/verifyotp', verifyOtp);
 router.post('/sendotp', sendOtp);
+router.post('/verifyotp', verifyOtp);
 router.post('/resetpassword', resetpassword);
 export default router;
