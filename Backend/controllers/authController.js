@@ -89,24 +89,37 @@ export const logoutUser = (req, res) => {
 
 
 export const sendOtp = async (req, res) => {
-    const { email } = req.body; 
+  try {
+    const { email } = req.body;
     const user = await User.findOne({ email });
     if (!user) {
-        return res.status(400).json({ success: false, message: 'User not found' });
+      return res.status(400).json({ success: false, message: "User not found" });
     }
+
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const otpExpiry = new Date(Date.now() + 10 * 60 * 1000);
     user.otp = otp;
     user.otpExpiry = otpExpiry;
     await user.save();
+
+    // console.log("📧 Trying to send OTP to:", email);
+
     await transporter.sendMail({
-        from: process.env.EMAIL_USER,
-        to: email,
-        subject: 'Your OTP Code',
-        text: `Your OTP code is ${otp}. It is valid for 5 minutes.`,
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: "Your OTP Code",
+      text: `Your OTP is ${otp}`,
     });
 
-    res.status(200).json({ success: true, message: 'OTP sent to email' });
+    res.status(200).json({ success: true, message: "OTP sent successfully!" });
+  } catch (error) {
+    console.error("❌ Nodemailer crashed =>", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to send OTP",
+      error: error.message,
+    });
+  }
 };
 
 export const verifyOtp = async (req, res) => {
