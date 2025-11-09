@@ -6,6 +6,8 @@ import Home from './pages/Home';
 import ForgotPassword from './pages/ResetPasswordPages/forgot_password';
 import VerifyOpt from './pages/ResetPasswordPages/Verify_otp';
 import Resetpassword from './pages/ResetPasswordPages/reset_password';
+import Admin_Login from './pages/Admin_Login';
+import Admin_Home from './pages/Admin_Home';
 const App = () => {
   return (
     <BrowserRouter>
@@ -16,6 +18,8 @@ const App = () => {
         <Route path='/forgot-password' element={<ForgotPassword />} />
         <Route path='/verify-otp' element={<VerifyOpt />} />
         <Route path='/reset-password' element={<Resetpassword />} />
+        <Route path='/admin-login' element={<Admin_Login />} />
+        <Route path='/admin-home' element={<Admin_Home />} />
       </Routes>
     </BrowserRouter>
   );

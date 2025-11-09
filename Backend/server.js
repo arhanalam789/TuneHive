@@ -4,7 +4,7 @@ import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 import connectToMongoDB from "./config/mongodb.js";
 import authRoutes from "./routes/authRoutes.js";
-
+import adminauthRoutes from "./routes/adminAuthRoutes.js";
 dotenv.config();
 const app = express();
 
@@ -42,6 +42,7 @@ app.use(cookieParser());
 connectToMongoDB();
 
 app.use("/api/auth", authRoutes);
+app.use("/api/adminauth", adminauthRoutes);
 
 app.get("/", (req, res) => {
   res.send("Hello World from TuneHive Backend 🚀");
