@@ -31,8 +31,10 @@ export default function Login() {
       );
 
       if (res.data.success) {
-        toast.success('Login successful!');
-        navigate('/');
+        toast.success("Login successful!");
+        setTimeout(() => {
+          navigate("/");
+        }, 500);
       } else {
         setError(res.data.message || 'Login failed. Please try again.');
       }

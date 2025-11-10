@@ -8,18 +8,38 @@ import VerifyOpt from './pages/ResetPasswordPages/Verify_otp';
 import Resetpassword from './pages/ResetPasswordPages/reset_password';
 import Admin_Login from './pages/Admin_Login';
 import Admin_Home from './pages/Admin_Home';
+import ProtectedRoute from './pages/components/ProtectedRoute';
+
 const App = () => {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path='/login' element={<Login />} />
-        <Route path='/signup' element={<Signup />} />
-        <Route path='/' element={<Home />} />
-        <Route path='/forgot-password' element={<ForgotPassword />} />
-        <Route path='/verify-otp' element={<VerifyOpt />} />
-        <Route path='/reset-password' element={<Resetpassword />} />
-        <Route path='/admin-login' element={<Admin_Login />} />
-        <Route path='/admin-home' element={<Admin_Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/verify-otp" element={<VerifyOpt />} />
+        <Route path="/reset-password" element={<Resetpassword />} />
+        <Route path="/admin-login" element={<Admin_Login />} />
+
+
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <Home />
+            </ProtectedRoute>
+          }
+        />
+
+    
+        <Route
+          path="/admin-home"
+          element={
+            <ProtectedRoute>
+              <Admin_Home />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );

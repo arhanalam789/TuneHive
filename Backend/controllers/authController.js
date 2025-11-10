@@ -42,8 +42,9 @@ export const registerUser = async (req, res) => {
 
     await newUser.save();
     const token = jwtsign({ id: newUser._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-    res.cookie('token', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'strict', maxAge: 3600000 });
-    return res.status(201).json({
+    res.cookie('token', token)
+    ;
+    res.status(201).json({
       success: true,
       message: 'User registered successfully',
     });
@@ -72,7 +73,7 @@ export const loginUser = async (req, res) => {
     }
 
     const token = jwtsign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-    res.cookie('token', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'strict', maxAge: 3600000 });
+    res.cookie('token', token);
     res.status(200).json({
       success: true,
       message: 'User logged in successfully',
@@ -84,7 +85,7 @@ export const loginUser = async (req, res) => {
 };
 
 export const logoutUser = (req, res) => {
-  res.clearCookie('token', { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'strict' });
+  res.clearCookie('token');
   res.status(200).json({
     success: true,
     message: 'User logged out successfully',

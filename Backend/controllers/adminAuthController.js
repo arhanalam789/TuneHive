@@ -24,7 +24,7 @@ export const adminLogin = async (req, res) => {
         }
 
         const token = jwtsign({ id: admin._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-        res.cookie('adminToken', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'strict', maxAge: 3600000 });
+        res.cookie('token', token);
         res.status(200).json({
             success: true,
             message: 'Admin logged in successfully',
@@ -36,7 +36,7 @@ export const adminLogin = async (req, res) => {
 };
 
 export const adminLogout = (req, res) => {
-    res.clearCookie('adminToken', { httpOnly: true, secure: process.env.NODE_ENV === 'production', sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'strict' });
+    res.clearCookie('token');
     res.status(200).json({
         success: true,
         message: 'Admin logged out successfully',
