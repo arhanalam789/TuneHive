@@ -34,7 +34,7 @@ export default function Login() {
         toast.success("Login successful!");
         setTimeout(() => {
           navigate("/");
-        }, 500);
+        }, 3000);
       } else {
         setError(res.data.message || 'Login failed. Please try again.');
       }
@@ -109,7 +109,7 @@ export default function Login() {
             />
           </div>
 
-          {/* User Login Button */}
+      
           <button
             type="submit"
             disabled={loading}
@@ -120,7 +120,7 @@ export default function Login() {
             {loading ? 'Logging in...' : 'Log In'}
           </button>
 
-          {/* Forgot Password */}
+    
           <div className="text-center">
             <Link to="/forgot-password" className="text-white text-sm underline hover:text-purple-400">
               Forgot your password?
@@ -128,12 +128,12 @@ export default function Login() {
           </div>
         </form>
 
-        {/* Divider */}
+
         <div className="flex items-center my-8">
           <div className="flex-1 border-t border-neutral-800"></div>
         </div>
 
-        {/* Sign up */}
+ 
         <div className="text-center">
           <p className="text-neutral-400 text-sm mb-4">Don't have an account?</p>
           <Link
