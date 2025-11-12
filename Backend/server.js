@@ -5,37 +5,30 @@ import dotenv from "dotenv";
 import connectToMongoDB from "./config/mongodb.js";
 import authRoutes from "./routes/authRoutes.js";
 import adminauthRoutes from "./routes/adminAuthRoutes.js";
+
 dotenv.config();
 const app = express();
 
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://tune-hive-git-main-arhans-projects-fdbbfd81.vercel.app",
+  "https://tune-hive-six.vercel.app",
+];
+
 app.use(
   cors({
-    origin: [
-      "http://localhost:5173",
-      "https://tune-hive-git-main-arhans-projects-fdbbfd81.vercel.app",
-      "https://tune-hive-six.vercel.app",
-    ],
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.indexOf(origin) === -1) {
+        return callback(new Error("CORS policy blocked this origin"), false);
+      }
+      return callback(null, true);
+    },
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", req.headers.origin);
-  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  res.header("Access-Control-Allow-Credentials", "true");
-  
-  if (req.method === "OPTIONS") {
-    return res.sendStatus(200);
-  }
-  next();
-});
-
 app.use(express.json());
-
-
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 

@@ -21,7 +21,6 @@ export default function ProtectedRoute({ children }) {
           setIsAuth(false);
         }
       } catch (err) {
-        console.error("Verification failed:", err);
         setIsAuth(false);
       }
     };
