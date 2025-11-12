@@ -34,7 +34,7 @@ export default function AdminLogin() {
         toast.success("Login successful!");
         setTimeout(() => {
           navigate("/admin-home");
-        }, 3000);
+        }, 500);
       } else {
         setError(res.data.message || 'Login failed. Please try again.');
       }

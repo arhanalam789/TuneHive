@@ -34,7 +34,7 @@ export default function Login() {
         toast.success("Login successful!");
         setTimeout(() => {
           navigate("/");
-        }, 3000);
+        }, 500);
       } else {
         setError(res.data.message || 'Login failed. Please try again.');
       }
@@ -60,7 +60,7 @@ export default function Login() {
     <div className="min-h-screen bg-black flex items-center justify-center px-4">
       <div className="w-full max-w-md">
 
-        {/* Logo and Title */}
+
         <div className="text-center mb-8">
           <div className="inline-block mb-4">
             <img
@@ -72,14 +72,14 @@ export default function Login() {
           <h1 className="text-white text-4xl font-bold">TuneHive</h1>
         </div>
 
-        {/* Error message */}
+
         {error && (
           <div className="bg-red-500/10 border border-red-500 text-red-400 px-4 py-3 rounded-lg text-sm mb-4 text-center">
             {error}
           </div>
         )}
 
-        {/* Form */}
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label htmlFor="email" className="block text-white text-sm font-medium mb-2">
@@ -143,7 +143,7 @@ export default function Login() {
             Sign up for TuneHive
           </Link>
 
-          {/* 🧑‍💼 Admin Login Button */}
+
           <button
             onClick={() => navigate('/admin-login')}
             className="w-full border border-purple-600 text-purple-400 font-semibold py-3 rounded-full hover:bg-purple-600 hover:text-white transition-colors"

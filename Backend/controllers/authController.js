@@ -6,7 +6,7 @@ import dotenv from 'dotenv';
 import nodemailer from 'nodemailer';
 import axios from 'axios'
 dotenv.config();
-
+import jwt from 'jsonwebtoken';
 // const transporter = nodemailer.createTransport({
 //   host: process.env.EMAIL_HOST,
 //   port: process.env.EMAIL_PORT,
@@ -17,7 +17,7 @@ dotenv.config();
 //   },
 // });
 
-
+const isProduction = process.env.NODE_ENV === "production";
 
 export const registerUser = async (req, res) => {
   try {
@@ -73,7 +73,12 @@ export const loginUser = async (req, res) => {
     }
 
     const token = jwtsign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-    res.cookie('token', token);
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: isProduction, 
+      sameSite: isProduction ? "None" : "Lax", 
+      path: "/",
+    });
     res.status(200).json({
       success: true,
       message: 'User logged in successfully',
@@ -165,4 +170,22 @@ export const resetpassword = async (req, res) => {
     user.password = hashedPassword;
     await user.save();
     res.status(200).json({ success: true, message: 'Password reset successfully' });
+};
+
+
+
+
+export const isAuthenticated = (req, res, next) => {
+  const token = req.cookies.token;
+  if (!token) {
+    return res.status(401).json({ success: false, message: "Not authenticated" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.userId = decoded.id;
+    next();
+  } catch (err) {
+    res.status(401).json({ success: false, message: "Invalid or expired token" });
+  }
 };
