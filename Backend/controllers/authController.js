@@ -79,6 +79,7 @@ export const loginUser = async (req, res) => {
       sameSite: isProduction ? "None" : "Lax", 
       path: "/",
     });
+
     res.status(200).json({
       success: true,
       message: 'User logged in successfully',
@@ -91,6 +92,7 @@ export const loginUser = async (req, res) => {
 
 export const logoutUser = (req, res) => {
   res.clearCookie('token');
+
   res.status(200).json({
     success: true,
     message: 'User logged out successfully',
@@ -177,10 +179,10 @@ export const resetpassword = async (req, res) => {
 
 export const isAuthenticated = (req, res, next) => {
   const token = req.cookies.token;
+  console.log("Authenticating user with token:", token);
   if (!token) {
     return res.status(401).json({ success: false, message: "Not authenticated" });
   }
-
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.userId = decoded.id;

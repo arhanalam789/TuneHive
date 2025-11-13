@@ -31,9 +31,11 @@ export const adminLogin = async (req, res) => {
             sameSite: isProduction ? "None" : "Lax", 
             path: "/",
           });
+
         res.status(200).json({
             success: true,
             message: 'Admin logged in successfully',
+            token: token
         });
     } catch (error) {
         console.error('Error logging in admin:', error);
@@ -51,6 +53,7 @@ export const adminLogout = (req, res) => {
 
 export const verifyAdmin = (req, res) => {
     const token = req.cookies.token;
+    console.log("Verifying admin with token:", token);
     if (!token) {
       return res.status(401).json({ success: false, message: "Not authenticated" });
     }
