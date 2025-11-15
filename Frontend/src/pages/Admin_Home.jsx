@@ -1,6 +1,27 @@
 import { Music, ListMusic, Library, Album } from 'lucide-react';
+import axios from "axios";
+import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 export default function AdminDashboard() {
+  const navigate = useNavigate();
+  const API_URL = import.meta.env.VITE_API_URL || "https://tunehive-nw51.onrender.com";
+
+  const handleLogout = async () => {
+    try {
+      const res = await axios.post(`${API_URL}/api/adminauth/logout`, {}, { withCredentials: true });
+      if (res.data.success) {
+        toast.success("Logged out successfully!");
+        setTimeout(() => navigate("/admin-login"), 1500);
+      } else {
+        toast.error(res.data.message || "Logout failed!");
+      }
+    } catch (error) {
+      console.error("Logout error:", error);
+      toast.error("Something went wrong while logging out.");
+    }
+  };
+
   const adminCards = [
     {
       title: 'Add a Song',
@@ -45,7 +66,10 @@ export default function AdminDashboard() {
             <h1 className="text-white text-2xl font-bold">TuneHive</h1>
           </div>
 
-          <button className="text-neutral-400 hover:text-white transition-colors text-sm">
+          <button
+            onClick={handleLogout}
+            className="text-neutral-400 hover:text-white transition-colors text-sm"
+          >
             Logout
           </button>
         </div>
@@ -116,4 +140,3 @@ export default function AdminDashboard() {
     </div>
   );
 }
-

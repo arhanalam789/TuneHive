@@ -2,12 +2,14 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import axios from 'axios';
 import toast from "react-hot-toast";
+import { Shield } from 'lucide-react';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showAdminTooltip, setShowAdminTooltip] = useState(false);
   const navigate = useNavigate();
 
   const API_URL = import.meta.env.VITE_API_URL || "https://tunehive-nw51.onrender.com";
@@ -57,10 +59,25 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center px-4">
+    <div className="min-h-screen bg-black flex items-center justify-center px-4 relative">
+      <div className="absolute top-6 right-6">
+        <button
+          onClick={() => navigate('/admin-login')}
+          onMouseEnter={() => setShowAdminTooltip(true)}
+          onMouseLeave={() => setShowAdminTooltip(false)}
+          className="w-10 h-10 bg-purple-600/20 hover:bg-purple-600/30 rounded-full flex items-center justify-center border border-purple-500/30 hover:border-purple-500/50 transition-all group relative"
+        >
+          <Shield className="w-5 h-5 text-purple-400 group-hover:text-purple-300" />
+          
+          {showAdminTooltip && (
+            <div className="absolute -bottom-10 right-0 bg-neutral-900 text-white text-sm px-3 py-2 rounded-lg border border-purple-500/30 whitespace-nowrap">
+              Admin Login
+            </div>
+          )}
+        </button>
+      </div>
+
       <div className="w-full max-w-md">
-
-
         <div className="text-center mb-8">
           <div className="inline-block mb-4">
             <img
@@ -72,13 +89,11 @@ export default function Login() {
           <h1 className="text-white text-4xl font-bold">TuneHive</h1>
         </div>
 
-
         {error && (
           <div className="bg-red-500/10 border border-red-500 text-red-400 px-4 py-3 rounded-lg text-sm mb-4 text-center">
             {error}
           </div>
         )}
-
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -109,7 +124,6 @@ export default function Login() {
             />
           </div>
 
-      
           <button
             type="submit"
             disabled={loading}
@@ -120,7 +134,6 @@ export default function Login() {
             {loading ? 'Logging in...' : 'Log In'}
           </button>
 
-    
           <div className="text-center">
             <Link to="/forgot-password" className="text-white text-sm underline hover:text-purple-400">
               Forgot your password?
@@ -128,28 +141,18 @@ export default function Login() {
           </div>
         </form>
 
-
         <div className="flex items-center my-8">
           <div className="flex-1 border-t border-neutral-800"></div>
         </div>
 
- 
         <div className="text-center">
           <p className="text-neutral-400 text-sm mb-4">Don't have an account?</p>
           <Link
             to="/signup"
-            className="block w-full border border-neutral-700 hover:border-purple-500 text-white font-semibold py-3 rounded-full transition-colors text-center mb-3"
+            className="block w-full border border-neutral-700 hover:border-purple-500 text-white font-semibold py-3 rounded-full transition-colors text-center"
           >
             Sign up for TuneHive
           </Link>
-
-
-          <button
-            onClick={() => navigate('/admin-login')}
-            className="w-full border border-purple-600 text-purple-400 font-semibold py-3 rounded-full hover:bg-purple-600 hover:text-white transition-colors"
-          >
-            Admin Login
-          </button>
         </div>
       </div>
     </div>
