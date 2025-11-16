@@ -53,7 +53,7 @@ export const adminLogout = (req, res) => {
 
 export const verifyAdmin = (req, res) => {
     const token = req.cookies.token;
-    console.log("Verifying admin with token:", token);
+    // console.log("Verifying admin with token:", token); 
     if (!token) {
       return res.status(401).json({ success: false, message: "Not authenticated" });
     }

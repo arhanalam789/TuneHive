@@ -27,7 +27,7 @@ export default function AdminDashboard() {
       title: 'Add a Song',
       description: 'Upload and manage individual tracks',
       icon: Music,
-      link: '/admin/add-song',
+      link: '/admin-home/add-song',
       gradient: 'from-purple-900/20 to-purple-600/20'
     },
     {
@@ -41,7 +41,7 @@ export default function AdminDashboard() {
       title: 'All Songs',
       description: 'View your uploaded tracks',
       icon: Library,
-      link: '/admin/all-songs',
+      link: '/admin-home/all-song',
       gradient: 'from-indigo-900/20 to-indigo-600/20'
     },
     {

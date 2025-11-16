@@ -9,7 +9,8 @@ import Resetpassword from './pages/ResetPasswordPages/reset_password';
 import Admin_Login from './pages/Admin_Login';
 import Admin_Home from './pages/Admin_Home';
 import ProtectedRoute from './pages/components/ProtectedRoute';
-
+import AddSong from './pages/AdminPower/AddSong';
+import AllSong from './pages/AdminPower/AllSong';
 const App = () => {
   return (
     <BrowserRouter>
@@ -40,6 +41,23 @@ const App = () => {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/admin-home/add-song"
+          element={
+            <ProtectedRoute>
+              <AddSong />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin-home/all-song"
+          element={
+            <ProtectedRoute>
+              <AllSong />
+            </ProtectedRoute>
+          }
+        />
+      
       </Routes>
     </BrowserRouter>
   );

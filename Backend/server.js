@@ -5,7 +5,7 @@ import dotenv from "dotenv";
 import connectToMongoDB from "./config/mongodb.js";
 import authRoutes from "./routes/authRoutes.js";
 import adminauthRoutes from "./routes/adminAuthRoutes.js";
-
+import adminPowerRoutes from "./routes/adminPowerRoutes.js";
 dotenv.config();
 const app = express();
 
@@ -36,6 +36,7 @@ connectToMongoDB();
 
 app.use("/api/auth", authRoutes);
 app.use("/api/adminauth", adminauthRoutes);
+app.use("/api/adminpower", adminPowerRoutes);
 
 app.get("/", (req, res) => {
   res.send("Hello World from TuneHive Backend 🚀");
