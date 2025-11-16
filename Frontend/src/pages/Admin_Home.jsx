@@ -2,23 +2,54 @@ import { Music, ListMusic, Library, Album } from 'lucide-react';
 import axios from "axios";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
-  const API_URL = import.meta.env.VITE_API_URL || "https://tunehive-nw51.onrender.com";
+  const API_URL = import.meta.env.VITE_API_URL;
+
+  const [stats, setStats] = useState({
+    totalSongs: 0,
+    totalPlaylists: 0,
+    activeUsers: 0
+  });
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const res = await axios.get(`${API_URL}/api/adminpower/stats`, {
+          withCredentials: true,
+        });
+
+        if (res.data.success) {
+          setStats({
+            totalSongs: res.data.totalSongs,
+            totalPlaylists: res.data.totalPlaylists,
+            activeUsers: res.data.activeUsers
+          });
+        }
+      } catch {}
+    };
+
+    fetchStats();
+  }, []);
 
   const handleLogout = async () => {
     try {
-      const res = await axios.post(`${API_URL}/api/adminauth/logout`, {}, { withCredentials: true });
+      const res = await axios.post(
+        `${API_URL}/api/adminauth/logout`,
+        {},
+        { withCredentials: true }
+      );
+
       if (res.data.success) {
         toast.success("Logged out successfully!");
-        setTimeout(() => navigate("/admin-login"), 1500);
+        setTimeout(() => navigate("/admin-login"), 1200);
       } else {
-        toast.error(res.data.message || "Logout failed!");
+        toast.error("Logout failed");
       }
-    } catch (error) {
-      console.error("Logout error:", error);
-      toast.error("Something went wrong while logging out.");
+    } catch {
+      toast.error("Logout error");
     }
   };
 
@@ -34,7 +65,7 @@ export default function AdminDashboard() {
       title: 'Add a Playlist',
       description: 'Create and curate playlists',
       icon: ListMusic,
-      link: '/admin/add-playlist',
+      link: '/admin-home/add-playlist',
       gradient: 'from-violet-900/20 to-violet-600/20'
     },
     {
@@ -48,7 +79,7 @@ export default function AdminDashboard() {
       title: 'All Playlists',
       description: 'Manage your playlist collection',
       icon: Album,
-      link: '/admin/all-playlists',
+      link: '/admin-home/all-playlists',
       gradient: 'from-purple-900/20 to-indigo-600/20'
     }
   ];
@@ -125,15 +156,17 @@ export default function AdminDashboard() {
         <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="rounded-xl border border-neutral-800 bg-neutral-900/50 p-6">
             <p className="text-neutral-400 text-sm mb-2">Total Songs</p>
-            <p className="text-white text-3xl font-bold">0</p>
+            <p className="text-white text-3xl font-bold">{stats.totalSongs}</p>
           </div>
+
           <div className="rounded-xl border border-neutral-800 bg-neutral-900/50 p-6">
             <p className="text-neutral-400 text-sm mb-2">Total Playlists</p>
-            <p className="text-white text-3xl font-bold">0</p>
+            <p className="text-white text-3xl font-bold">{stats.totalPlaylists}</p>
           </div>
+
           <div className="rounded-xl border border-neutral-800 bg-neutral-900/50 p-6">
             <p className="text-neutral-400 text-sm mb-2">Active Users</p>
-            <p className="text-white text-3xl font-bold">0</p>
+            <p className="text-white text-3xl font-bold">{stats.activeUsers}</p>
           </div>
         </div>
       </main>

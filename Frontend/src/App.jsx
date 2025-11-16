@@ -11,6 +11,9 @@ import Admin_Home from './pages/Admin_Home';
 import ProtectedRoute from './pages/components/ProtectedRoute';
 import AddSong from './pages/AdminPower/AddSong';
 import AllSong from './pages/AdminPower/AllSong';
+import AddPlaylist from './pages/AdminPower/AddPlaylist';
+import AllPlaylists from './pages/AdminPower/AllPlayLists';
+import PlaylistDetails from './pages/AdminPower/PlaylistDetails';
 const App = () => {
   return (
     <BrowserRouter>
@@ -57,10 +60,34 @@ const App = () => {
             </ProtectedRoute>
           }
         />
-      
+        <Route
+          path="/admin-home/add-playlist"
+          element={
+            <ProtectedRoute>
+              <AddPlaylist />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin-home/all-playlists"
+          element={
+            <ProtectedRoute>
+              <AllPlaylists />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin-home/playlist/:id"
+          element={
+            <ProtectedRoute>
+              <PlaylistDetails />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );
 };
+
 
 export default App;

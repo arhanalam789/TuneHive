@@ -1,8 +1,9 @@
 import experss from 'express';
 
+
 const router = experss.Router();
 
-import { addSong,getAllSongs } from '../controllers/adminPowerController.js';
+import { addSong,getAllSongs,addPlaylist,getAllPlaylists,getPlaylistById,updatePlaylistSongs,deleteSong,editSong ,getDashboardStats} from '../controllers/adminPowerController.js';
 import upload from '../middleware/multerConfig.js';
 
 router.post(
@@ -14,4 +15,28 @@ router.post(
     addSong
   );
   router.get("/all-songs", getAllSongs);
+
+
+
+  router.post(
+    "/add-playlist",
+    upload.single("coverImage"),
+    addPlaylist
+  );
+  
+
+  router.get("/all-playlists", getAllPlaylists);
+
+
+  router.get("/playlist/:id", getPlaylistById);
+
+  router.put("/playlist/:id/songs", updatePlaylistSongs);
+
+  router.delete("/delete-song/:id", deleteSong);
+  router.put("/edit-song/:id", editSong);
+
+  router.get("/stats", getDashboardStats);
+
+
 export default router;
+
