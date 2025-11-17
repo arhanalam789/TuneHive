@@ -315,3 +315,83 @@ export const getDashboardStats = async (req, res) => {
     return res.json({ success: false });
   }
 };
+
+
+export const updatePlaylistDetails = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, description } = req.body;
+
+    const playlist = await Playlist.findById(id);
+    if (!playlist) return res.json({ success: false });
+
+    let coverImage = playlist.coverImage;
+
+    if (req.file) {
+      const oldKey = playlist.coverImage?.split(".amazonaws.com/")[1];
+
+      if (oldKey) {
+        await s3.send(new DeleteObjectCommand({
+          Bucket: process.env.AWS_BUCKET_NAME,
+          Key: oldKey,
+        }));
+      }
+
+      const file = req.file;
+      const newKey = `playlist-covers/${Date.now()}-${file.originalname}`;
+
+      await s3.send(
+        new PutObjectCommand({
+          Bucket: process.env.AWS_BUCKET_NAME,
+          Key: newKey,
+          Body: file.buffer,
+          ContentType: file.mimetype,
+        })
+      );
+
+      coverImage = `https://${process.env.AWS_BUCKET_NAME}.s3.amazonaws.com/${newKey}`;
+    }
+
+    playlist.title = title || playlist.title;
+    playlist.description = description || playlist.description;
+    playlist.coverImage = coverImage;
+
+    await playlist.save();
+
+    const updated = await Playlist.findById(id).populate("songs");
+
+    res.json({ success: true, playlist: updated });
+
+  } catch {
+    res.json({ success: false });
+  }
+};
+
+export const deletePlaylist = async (req, res) => {
+  try {
+    const playlist = await Playlist.findById(req.params.id);
+    if (!playlist) return res.json({ success: false });
+
+    if (playlist.coverImage) {
+      const key = playlist.coverImage.split(".amazonaws.com/")[1];
+
+      if (key) {
+        await s3.send(
+          new DeleteObjectCommand({
+            Bucket: process.env.AWS_BUCKET_NAME,
+            Key: key,
+          })
+        );
+      }
+    }
+
+    await Playlist.findByIdAndDelete(req.params.id);
+
+    res.json({ success: true });
+
+  } catch {
+    res.json({ success: false });
+  }
+};
+
+

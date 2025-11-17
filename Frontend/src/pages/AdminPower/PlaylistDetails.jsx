@@ -24,6 +24,11 @@ export default function PlaylistDetails() {
   const [saving, setSaving] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editTitle, setEditTitle] = useState("");
+  const [editDesc, setEditDesc] = useState("");
+  const [editCover, setEditCover] = useState(null);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -36,10 +41,7 @@ export default function PlaylistDetails() {
           }),
         ]);
 
-        if (!playlistRes.data.success) {
-          toast.error(playlistRes.data.message || "Failed to fetch playlist");
-          return;
-        }
+        if (!playlistRes.data.success) return toast.error("Failed to fetch playlist");
 
         setPlaylist(playlistRes.data.playlist);
         setAllSongs(songsRes.data.songs || []);
@@ -49,13 +51,10 @@ export default function PlaylistDetails() {
         );
         setSelectedSongIds(initialIds);
       } catch (error) {
-        console.error("Error loading playlist:", error);
         if (error.response?.status === 401) {
           toast.error("Unauthorized! Please login again");
           setTimeout(() => navigate("/admin-login"), 1500);
-        } else {
-          toast.error("Failed to load playlist");
-        }
+        } else toast.error("Failed to load playlist");
       } finally {
         setLoading(false);
       }
@@ -92,7 +91,6 @@ export default function PlaylistDetails() {
 
   const handleSave = async () => {
     if (!playlist) return;
-
     try {
       setSaving(true);
       const res = await axios.put(
@@ -100,28 +98,60 @@ export default function PlaylistDetails() {
         { songs: selectedSongIds },
         { withCredentials: true }
       );
-
       if (res.data.success) {
         toast.success("Playlist updated");
         setPlaylist(res.data.playlist);
-      } else {
-        toast.error(res.data.message || "Failed to update playlist");
-      }
-    } catch (error) {
-      console.error("Error updating playlist:", error);
-      toast.error("Server error while updating playlist");
+      } else toast.error("Failed to update playlist");
+    } catch {
+      toast.error("Server error");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleUpdatePlaylist = async () => {
+    try {
+      const formData = new FormData();
+      formData.append("title", editTitle);
+      formData.append("description", editDesc);
+      if (editCover) formData.append("coverImage", editCover);
+
+      const res = await axios.put(
+        `${API_URL}/api/adminpower/playlist/${playlist._id}/edit`,
+        formData,
+        { withCredentials: true }
+      );
+
+      if (res.data.success) {
+        toast.success("Playlist updated!");
+        setPlaylist(res.data.playlist);
+        setShowEditModal(false);
+      } else toast.error("Failed to update");
+    } catch {
+      toast.error("Server error");
+    }
+  };
+
+  const handleDeletePlaylist = async () => {
+    if (!confirm("Delete this playlist?")) return;
+    try {
+      const res = await axios.delete(
+        `${API_URL}/api/adminpower/playlist/${playlist._id}/delete`,
+        { withCredentials: true }
+      );
+      if (res.data.success) {
+        toast.success("Playlist deleted");
+        navigate("/admin-home/all-playlists");
+      } else toast.error("Failed to delete");
+    } catch {
+      toast.error("Server error");
     }
   };
 
   if (loading) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="flex flex-col items-center">
-          <Loader2 className="w-10 h-10 text-purple-500 animate-spin mb-4" />
-          <p className="text-neutral-400">Loading playlist...</p>
-        </div>
+        <Loader2 className="w-10 h-10 text-purple-500 animate-spin" />
       </div>
     );
   }
@@ -147,17 +177,16 @@ export default function PlaylistDetails() {
           <div className="flex items-center gap-3">
             <img
               src="https://i.pinimg.com/originals/91/22/60/912260373c0d9bee4d5bbf80d1af8033.jpg"
-              alt="TuneHive"
               className="w-10 h-10 rounded-full object-cover"
             />
             <h1 className="text-white text-2xl font-bold">TuneHive</h1>
           </div>
+
           <button
             onClick={() => navigate("/admin-home")}
-            className="flex items-center gap-2 text-neutral-400 hover:text-white transition-colors text-sm"
+            className="flex items-center gap-2 text-neutral-400 hover:text-white text-sm"
           >
-            <ArrowLeft className="w-4 h-4" />
-            Back to Dashboard
+            <ArrowLeft className="w-4 h-4" /> Back to Dashboard
           </button>
         </div>
       </header>
@@ -166,86 +195,76 @@ export default function PlaylistDetails() {
         <section className="flex flex-col md:flex-row gap-6 items-start">
           <div className="w-40 h-40 md:w-52 md:h-52 rounded-xl overflow-hidden bg-neutral-900 border border-neutral-800 flex items-center justify-center">
             {playlist.coverImage ? (
-              <img
-                src={playlist.coverImage}
-                alt={playlist.title}
-                className="w-full h-full object-cover"
-              />
+              <img src={playlist.coverImage} className="w-full h-full object-cover" />
             ) : (
-              <div className="flex flex-col items-center text-neutral-500">
-                <Music className="w-10 h-10 mb-2" />
-                <span className="text-xs">No cover image</span>
-              </div>
+              <Music className="w-10 h-10 text-neutral-500" />
             )}
           </div>
 
           <div className="flex-1">
-            <p className="uppercase text-xs text-purple-400 tracking-wide mb-2">
-              Playlist
-            </p>
-            <h2 className="text-3xl md:text-5xl font-bold text-white mb-3">
-              {playlist.title}
-            </h2>
+            <div className="flex items-center gap-4 mb-3">
+              <h2 className="text-3xl md:text-5xl font-bold text-white">
+                {playlist.title}
+              </h2>
+
+              <button
+                onClick={() => {
+                  setEditTitle(playlist.title);
+                  setEditDesc(playlist.description || "");
+                  setShowEditModal(true);
+                }}
+                className="px-3 py-1.5 text-sm rounded-lg bg-neutral-800 text-white border border-neutral-700 hover:border-purple-500 hover:bg-neutral-700"
+              >
+                Edit
+              </button>
+
+              <button
+                onClick={handleDeletePlaylist}
+                className="px-3 py-1.5 text-sm rounded-lg bg-red-600 text-white hover:bg-red-500"
+              >
+                Delete
+              </button>
+            </div>
+
             {playlist.description && (
-              <p className="text-neutral-300 mb-4 max-w-xl">
-                {playlist.description}
-              </p>
+              <p className="text-neutral-300 mb-4">{playlist.description}</p>
             )}
+
             <p className="text-neutral-400 text-sm">
-              {selectedSongIds.length} song
-              {selectedSongIds.length !== 1 ? "s" : ""} in this playlist
+              {selectedSongIds.length} songs
             </p>
           </div>
         </section>
 
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="rounded-2xl border border-neutral-800 bg-gradient-to-br from-neutral-900 to-black p-6 flex flex-col h-full">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-lg bg-purple-600/10 border border-purple-500/20 flex items-center justify-center">
-                  <ListMusic className="w-5 h-5 text-purple-400" />
-                </div>
-                <div>
-                  <p className="text-white font-semibold text-sm">
-                    Songs in Playlist
-                  </p>
-                  <p className="text-neutral-400 text-xs">
-                    {selectedSongs.length} selected
-                  </p>
-                </div>
+          <div className="rounded-2xl border border-neutral-800 bg-gradient-to-br from-neutral-900 to-black p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-9 h-9 rounded-lg bg-purple-600/10 border border-purple-500/20 flex items-center justify-center">
+                <ListMusic className="w-5 h-5 text-purple-400" />
+              </div>
+              <div>
+                <p className="text-white font-semibold text-sm">Songs in Playlist</p>
+                <p className="text-neutral-400 text-xs">{selectedSongs.length} selected</p>
               </div>
             </div>
 
-            <div className="flex-1 max-h-80 overflow-y-auto pr-1 space-y-2">
-              {selectedSongs.length === 0 && (
-                <p className="text-neutral-500 text-sm">
-                  No songs in this playlist. Add from the right panel.
-                </p>
-              )}
-
+            <div className="max-h-80 overflow-y-auto space-y-2 pr-1">
               {selectedSongs.map((song) => (
                 <div
                   key={song._id}
                   className="flex items-center gap-3 px-3 py-2 rounded-lg border border-neutral-800 bg-neutral-900/70"
                 >
-                  <img
-                    src={song.imageurl}
-                    alt={song.title}
-                    className="w-10 h-10 rounded-md object-cover"
-                  />
+                  <img src={song.imageurl} className="w-10 h-10 rounded-md object-cover" />
                   <div className="flex-1">
-                    <p className="text-white text-sm font-medium truncate">
-                      {song.title}
-                    </p>
+                    <p className="text-white text-sm font-medium truncate">{song.title}</p>
                     <p className="text-neutral-400 text-xs truncate">
-                      {song.artist}{" "}
-                      {song.album ? `• ${song.album}` : ""}
+                      {song.artist} {song.album ? `• ${song.album}` : ""}
                     </p>
                   </div>
                   <button
                     type="button"
                     onClick={() => toggleSong(song._id)}
-                    className="p-1.5 rounded-full border border-neutral-700 hover:border-red-500 hover:bg-red-500/10 transition-colors"
+                    className="p-1.5 rounded-full border border-neutral-700 hover:border-red-500 hover:bg-red-500/10"
                   >
                     <Trash2 className="w-4 h-4 text-neutral-400 hover:text-red-400" />
                   </button>
@@ -254,39 +273,26 @@ export default function PlaylistDetails() {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-neutral-800 bg-gradient-to-br from-neutral-900 to-black p-6 flex flex-col h-full">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-lg bg-purple-600/10 border border-purple-500/20 flex items-center justify-center">
-                  <Music className="w-5 h-5 text-purple-400" />
-                </div>
-                <div>
-                  <p className="text-white font-semibold text-sm">
-                    Your Library
-                  </p>
-                  <p className="text-neutral-400 text-xs">
-                    tap to add / remove songs
-                  </p>
-                </div>
+          <div className="rounded-2xl border border-neutral-800 bg-gradient-to-br from-neutral-900 to-black p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-9 h-9 rounded-lg bg-purple-600/10 border border-purple-500/20 flex items-center justify-center">
+                <Music className="w-5 h-5 text-purple-400" />
               </div>
+              <p className="text-white font-semibold text-sm">Your Library</p>
             </div>
 
             <div className="relative mb-3">
               <Search className="w-4 h-4 text-neutral-500 absolute left-3 top-2.5" />
               <input
                 type="text"
-                placeholder="Search by title, artist, album..."
+                placeholder="Search songs..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-8 pr-3 py-2 bg-neutral-900 border border-neutral-700 rounded-lg text-sm text-white placeholder-neutral-500 focus:ring-2 focus:ring-purple-500"
+                className="w-full pl-8 pr-3 py-2 bg-neutral-900 border border-neutral-700 rounded-lg text-sm text-white placeholder-neutral-500"
               />
             </div>
 
-            <div className="flex-1 max-h-80 overflow-y-auto pr-1 space-y-2">
-              {filteredAvailableSongs.length === 0 && (
-                <p className="text-neutral-500 text-sm">No songs found.</p>
-              )}
-
+            <div className="max-h-80 overflow-y-auto pr-1 space-y-2">
               {filteredAvailableSongs.map((song) => {
                 const selected = selectedSongIds.includes(song._id);
                 return (
@@ -294,7 +300,7 @@ export default function PlaylistDetails() {
                     key={song._id}
                     type="button"
                     onClick={() => toggleSong(song._id)}
-                    className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg border text-left transition-all ${
+                    className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg border transition-all ${
                       selected
                         ? "border-purple-500 bg-purple-500/10"
                         : "border-neutral-800 hover:border-neutral-600 bg-neutral-900/70"
@@ -302,21 +308,15 @@ export default function PlaylistDetails() {
                   >
                     <img
                       src={song.imageurl}
-                      alt={song.title}
                       className="w-10 h-10 rounded-md object-cover"
                     />
                     <div className="flex-1">
-                      <p className="text-white text-sm font-medium truncate">
-                        {song.title}
-                      </p>
+                      <p className="text-white text-sm font-medium truncate">{song.title}</p>
                       <p className="text-neutral-400 text-xs truncate">
-                        {song.artist}{" "}
-                        {song.album ? `• ${song.album}` : ""}
+                        {song.artist} {song.album ? `• ${song.album}` : ""}
                       </p>
                     </div>
-                    {selected && (
-                      <Check className="w-4 h-4 text-purple-400 flex-shrink-0" />
-                    )}
+                    {selected && <Check className="w-4 h-4 text-purple-400" />}
                   </button>
                 );
               })}
@@ -324,21 +324,66 @@ export default function PlaylistDetails() {
           </div>
         </section>
 
-        <section className="flex justify-end">
+        <div className="flex justify-end">
           <button
             type="button"
             onClick={handleSave}
             disabled={saving}
             className={`px-6 py-3 rounded-full font-semibold text-sm ${
-              saving
-                ? "bg-purple-600/60 cursor-not-allowed"
-                : "bg-purple-600 hover:bg-purple-500"
-            } text-white transition-colors`}
+              saving ? "bg-purple-600/60" : "bg-purple-600 hover:bg-purple-500"
+            } text-white`}
           >
-            {saving ? "Saving changes..." : "Save Changes"}
+            {saving ? "Saving..." : "Save Changes"}
           </button>
-        </section>
+        </div>
       </main>
+
+      {showEditModal && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[999]">
+          <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-8 w-[90%] max-w-md">
+            <h2 className="text-xl font-bold text-white mb-6">Edit Playlist</h2>
+
+            <div className="space-y-4">
+              <input
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                className="w-full px-4 py-2 rounded-lg bg-neutral-800 text-white border border-neutral-700"
+                placeholder="Playlist title"
+              />
+
+              <textarea
+                value={editDesc}
+                onChange={(e) => setEditDesc(e.target.value)}
+                className="w-full px-4 py-2 rounded-lg bg-neutral-800 text-white border border-neutral-700 h-24"
+                placeholder="Description"
+              />
+
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => setEditCover(e.target.files[0])}
+                className="w-full text-sm text-neutral-300"
+              />
+            </div>
+
+            <div className="flex justify-end gap-3 mt-6">
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="px-4 py-2 rounded-lg bg-neutral-700 text-white hover:bg-neutral-600"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={handleUpdatePlaylist}
+                className="px-4 py-2 rounded-lg bg-purple-600 text-white hover:bg-purple-500"
+              >
+                Update
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
