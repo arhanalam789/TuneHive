@@ -34,6 +34,7 @@ export default function Login() {
 
       if (res.data.success) {
         toast.success("Login successful!");
+        localStorage.setItem("userToken", res.data.token);
         setTimeout(() => {
           navigate("/");
         }, 500);

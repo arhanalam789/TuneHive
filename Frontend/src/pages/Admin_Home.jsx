@@ -44,6 +44,7 @@ export default function AdminDashboard() {
 
       if (res.data.success) {
         toast.success("Logged out successfully!");
+        localStorage.removeItem("adminToken");
         setTimeout(() => navigate("/admin-login"), 1200);
       } else {
         toast.error("Logout failed");

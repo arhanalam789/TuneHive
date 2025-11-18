@@ -32,6 +32,7 @@ export default function AdminLogin() {
 
       if (res.data.success) {
         toast.success("Login successful!");
+        localStorage.setItem("adminToken", res.data.token);
         setTimeout(() => {
           navigate("/admin-home");
         }, 500);
