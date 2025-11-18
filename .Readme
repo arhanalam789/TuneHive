@@ -1,0 +1,229 @@
+# 🎵 TuneHive - Complete Documentation
+
+---
+
+## 📌 1. Project Title
+
+**TuneHive – A Complete Music Library Management System**
+
+A modern music management dashboard for administrators to upload songs, manage playlists, update cover images, and organize the entire music library using AWS cloud storage.
+
+---
+
+## 📌 2. Problem Statement
+
+Managing large music libraries becomes difficult without a centralized system. Songs, artists, albums, and playlists often become scattered across folders. Manual management of audio files, cover images, and metadata leads to confusion and inefficiency.
+
+**TuneHive solves this problem by providing:**
+
+* A central admin dashboard
+* Easy song uploads (audio + image)
+* Playlist creation and assignment
+* Real-time searching & filtering
+* Cloud-based storage with AWS S3
+* A modern UI for efficient content management
+
+---
+
+## 📌 3. System Architecture
+
+```
+Frontend (React + Vite + Tailwind + Axios)
+        ↓
+Backend (Node.js + Express.js)
+        ↓
+Database (MongoDB + Mongoose)
+        ↓
+AWS S3 Storage (Pre-signed URL Uploads)
+```
+
+### 🏗️ Architecture Overview
+
+| Layer          | Technology                                                              |
+| -------------- | ----------------------------------------------------------------------- |
+| Frontend       | React.js, Vite, TailwindCSS, Axios, React Router                        |
+| Backend        | Node.js, Express.js                                                     |
+| Database       | MongoDB + Mongoose                                                      |
+| Authentication | JWT + HttpOnly Cookies                                                  |
+| File Storage   | AWS S3 (Presigned URLs)                                                 |
+| Hosting        | Frontend → Vercel/Netlify, Backend → Render/Railway, DB → MongoDB Atlas |
+
+---
+
+## 📌 4. Key Features
+
+### 🔐 Authentication System
+
+* Admin login
+* Secure JWT stored in HttpOnly cookies
+* Protected routes
+
+### 🎵 Song Management
+
+* Upload audio (MP3, WAV, FLAC)
+* Choose cover image
+* Upload cover image to AWS S3
+* Add metadata (title, artist, album)
+* Search, filter, delete songs
+
+### 🎧 Playlist Management
+
+* Create new playlists
+* Edit name & description
+* Update cover image
+* Add/remove songs to playlists
+* Search functionality to find songs
+* Delete playlist
+
+### 🌗 UI/UX Features
+
+* Clean modern UI with Tailwind
+* Dark theme
+* Responsive layout
+* Toast alerts for every action
+* Lucide-react icons
+
+---
+
+## 📌 5. Tech Stack
+
+| Layer          | Tools                                             |
+| -------------- | ------------------------------------------------- |
+| Frontend       | React.js, Vite, Tailwind CSS, Axios, React Router |
+| Backend        | Node.js, Express.js                               |
+| Database       | MongoDB (Atlas)                                   |
+| Authentication | JWT + Cookies                                     |
+| File Uploads   | AWS S3 Presigned URLs                             |
+| Hosting        | Netlify/Vercel + Render/Railway                   |
+
+---
+
+## 📌 6. API Overview
+
+### 🔐 Authentication APIs
+
+| Endpoint                | Method | Description |
+| ----------------------- | ------ | ----------- |
+| `/api/adminauth/login`  | POST   | Admin login |
+| `/api/adminauth/logout` | POST   | Logout user |
+
+---
+
+### 🎵 Songs APIs
+
+| Endpoint                     | Method | Description            |
+| ---------------------------- | ------ | ---------------------- |
+| `/api/adminpower/uploadSong` | POST   | Upload song + metadata |
+| `/api/adminpower/all-songs`  | GET    | Fetch all songs        |
+| `/api/adminpower/song/:id`   | PUT    | Update song            |
+| `/api/adminpower/song/:id`   | DELETE | Delete song            |
+
+---
+
+### 🎧 Playlist APIs
+
+| Endpoint                             | Method | Description                |
+| ------------------------------------ | ------ | -------------------------- |
+| `/api/adminpower/create-playlist`    | POST   | Create new playlist        |
+| `/api/adminpower/playlist/:id`       | GET    | Get playlist details       |
+| `/api/adminpower/playlist/:id`       | PUT    | Update playlist details    |
+| `/api/adminpower/playlist/:id/songs` | PUT    | Update playlist songs only |
+| `/api/adminpower/playlist/:id`       | DELETE | Delete playlist            |
+
+---
+
+### ☁️ AWS Pre-signed URL APIs
+
+| Endpoint                                    | Method | Description                          |
+| ------------------------------------------- | ------ | ------------------------------------ |
+| `/api/adminpower/song/upload-url`           | GET    | Get presigned URL for audio upload   |
+| `/api/adminpower/playlist/cover-upload-url` | GET    | Presigned URL for cover image upload |
+
+---
+
+## 📌 7. Frontend Pages
+
+### Pages Included
+
+* **Admin Login Page**
+* **Admin Dashboard**
+* **Add Song Page** (audio + image upload)
+* **All Songs Page**
+* **Playlist List Page**
+* **Playlist Details Page** (edit, update, delete)
+* **Create Playlist Page**
+
+---
+
+## 📌 8. Deployment Guide
+
+### 🚀 Frontend Deployment (Vercel/Netlify)
+
+1. Build project: `npm run build`
+2. Upload `/dist` folder
+3. Add environment variable:
+
+   * `VITE_API_URL` = Backend deployed URL
+
+### ⚙️ Backend Deployment (Render/Railway)
+
+1. Push to GitHub
+2. Create new Web Service
+3. Add environment variables:
+
+   * `JWT_SECRET`
+   * `MONGO_URI`
+   * AWS S3 KEYS
+4. Deploy
+
+### 🗄 Database Deployment (MongoDB Atlas)
+
+* Create free cluster
+* Whitelist Render IP
+* Connect via connection string
+
+### ☁️ AWS S3 Setup
+
+* Create S3 bucket
+* Enable CORS
+* Create IAM User
+* Add permissions: `PutObject`, `GetObject`
+* Store keys in backend
+
+---
+
+## 📌 9. Folder Structure
+
+```
+root
+│── backend
+│   ├── controllers
+│   ├── models
+│   ├── routes
+│   ├── middlewares
+│   └── utils (AWS)
+│
+└── frontend
+    ├── src
+    │   ├── pages
+    │   ├── components
+    │   ├── context
+    │   ├── api
+    │   └── styles
+```
+
+---
+
+## 📌 10. Conclusion
+
+TuneHive is a complete full-stack music admin platform with:
+
+* Cloud upload system
+* Modern UI
+* Playlist management
+* Song management
+* Secure admin authentication
+
+This documentation contains everything needed for development, deployment, and extension of the project till now.
+
+
