@@ -18,8 +18,12 @@ const userschema = new mongoose.Schema({
         type: String,
         required: true
     },
-    otp:{type:String},
-    otpExpiry:{type:Date}
+    otp: { type: String },
+    otpExpiry: { type: Date },
+    likedSongs: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Song'
+    }]
 })
 
 const userModel = mongoose.model('User', userschema);

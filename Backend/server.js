@@ -34,9 +34,12 @@ app.use(cookieParser());
 
 connectToMongoDB();
 
+import userRoutes from "./routes/userRoutes.js";
+
 app.use("/api/auth", authRoutes);
 app.use("/api/adminauth", adminauthRoutes);
 app.use("/api/adminpower", adminPowerRoutes);
+app.use("/api/user", userRoutes);
 
 app.get("/", (req, res) => {
   res.send("Hello World from TuneHive Backend 🚀");

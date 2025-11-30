@@ -22,12 +22,12 @@ export const addSong = async (req, res) => {
     const imageKey = `images/${Date.now()}-${imageFile.originalname}`;
     const existingSong = await Song.findOne({ title, artist });
 
-      if (existingSong) {
-        return res.status(400).json({
-          success: false,
-          message: "This song already exists in the database",
-        });
-      }
+    if (existingSong) {
+      return res.status(400).json({
+        success: false,
+        message: "This song already exists in the database",
+      });
+    }
 
     await s3.send(
       new PutObjectCommand({
@@ -38,7 +38,7 @@ export const addSong = async (req, res) => {
       })
     );
 
-  
+
     await s3.send(
       new PutObjectCommand({
         Bucket: process.env.AWS_BUCKET_NAME,
@@ -70,8 +70,36 @@ export const addSong = async (req, res) => {
 
 export const getAllSongs = async (req, res) => {
   try {
-    const songs = await Song.find().sort({ createdAt: -1 });
-    res.status(200).json({ success: true, songs });
+    const { page = 1, limit = 10, search = '', sort = 'newest' } = req.query;
+
+    const query = {};
+    if (search) {
+      query.$or = [
+        { title: { $regex: search, $options: 'i' } },
+        { artist: { $regex: search, $options: 'i' } },
+        { album: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    let sortOption = { createdAt: -1 };
+    if (sort === 'oldest') sortOption = { createdAt: 1 };
+    if (sort === 'a-z') sortOption = { title: 1 };
+    if (sort === 'z-a') sortOption = { title: -1 };
+
+    const songs = await Song.find(query)
+      .sort(sortOption)
+      .limit(limit * 1)
+      .skip((page - 1) * limit);
+
+    const count = await Song.countDocuments(query);
+
+    res.status(200).json({
+      success: true,
+      songs,
+      totalPages: Math.ceil(count / limit),
+      currentPage: page,
+      totalSongs: count
+    });
   } catch (err) {
     console.error("Error fetching songs:", err);
     res.status(500).json({ success: false, message: "Failed to fetch songs" });
@@ -94,7 +122,7 @@ export const addPlaylist = async (req, res) => {
     let songIds = [];
     if (songs) {
       try {
-        songIds = JSON.parse(songs); 
+        songIds = JSON.parse(songs);
       } catch (e) {
         return res.status(400).json({
           success: false,
@@ -103,7 +131,7 @@ export const addPlaylist = async (req, res) => {
       }
     }
 
-  
+
     if (songIds.length > 0) {
       const existingSongs = await Song.find({ _id: { $in: songIds } });
       if (existingSongs.length !== songIds.length) {
@@ -159,7 +187,7 @@ export const addPlaylist = async (req, res) => {
 export const getAllPlaylists = async (req, res) => {
   try {
     const playlists = await Playlist.find()
-      .populate("songs") // full song details chahiye to
+      .populate("songs") 
       .sort({ createdAt: -1 });
 
     return res.status(200).json({
@@ -206,7 +234,7 @@ export const getPlaylistById = async (req, res) => {
 export const updatePlaylistSongs = async (req, res) => {
   try {
     const { id } = req.params;
-    const { songs } = req.body; // songs: array of songIds
+    const { songs } = req.body; 
 
     if (!Array.isArray(songs)) {
       return res.status(400).json({

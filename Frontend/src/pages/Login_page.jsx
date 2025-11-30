@@ -35,6 +35,7 @@ export default function Login() {
       if (res.data.success) {
         toast.success("Login successful!");
         localStorage.setItem("userToken", res.data.token);
+        localStorage.setItem("userData", JSON.stringify(res.data.user));
         setTimeout(() => {
           navigate("/");
         }, 500);
@@ -69,7 +70,7 @@ export default function Login() {
           className="w-10 h-10 bg-purple-600/20 hover:bg-purple-600/30 rounded-full flex items-center justify-center border border-purple-500/30 hover:border-purple-500/50 transition-all group relative"
         >
           <Shield className="w-5 h-5 text-purple-400 group-hover:text-purple-300" />
-          
+
           {showAdminTooltip && (
             <div className="absolute -bottom-10 right-0 bg-neutral-900 text-white text-sm px-3 py-2 rounded-lg border border-purple-500/30 whitespace-nowrap">
               Admin Login
@@ -128,9 +129,8 @@ export default function Login() {
           <button
             type="submit"
             disabled={loading}
-            className={`w-full ${
-              loading ? 'bg-purple-800 cursor-not-allowed' : 'bg-purple-600 hover:bg-purple-500'
-            } text-white font-semibold py-3 rounded-full transition-colors`}
+            className={`w-full ${loading ? 'bg-purple-800 cursor-not-allowed' : 'bg-purple-600 hover:bg-purple-500'
+              } text-white font-semibold py-3 rounded-full transition-colors`}
           >
             {loading ? 'Logging in...' : 'Log In'}
           </button>

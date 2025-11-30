@@ -14,78 +14,93 @@ import AllSong from './pages/AdminPower/AllSong';
 import AddPlaylist from './pages/AdminPower/AddPlaylist';
 import AllPlaylists from './pages/AdminPower/AllPlayLists';
 import PlaylistDetails from './pages/AdminPower/PlaylistDetails';
+import { PlayerProvider } from './context/PlayerContext';
+import MusicPlayer from './components/MusicPlayer';
+import UserPlaylistDetails from './pages/UserPlaylistDetails';
+
 const App = () => {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/verify-otp" element={<VerifyOpt />} />
-        <Route path="/reset-password" element={<Resetpassword />} />
-        <Route path="/admin-login" element={<Admin_Login />} />
+    <PlayerProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/verify-otp" element={<VerifyOpt />} />
+          <Route path="/reset-password" element={<Resetpassword />} />
+          <Route path="/admin-login" element={<Admin_Login />} />
 
 
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute>
-              <Home />
-            </ProtectedRoute>
-          }
-        />
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <Home />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/playlist/:id"
+            element={
+              <ProtectedRoute>
+                <UserPlaylistDetails />
+              </ProtectedRoute>
+            }
+          />
 
-    
-        <Route
-          path="/admin-home"
-          element={
-            <ProtectedRoute>
-              <Admin_Home />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin-home/add-song"
-          element={
-            <ProtectedRoute>
-              <AddSong />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin-home/all-song"
-          element={
-            <ProtectedRoute>
-              <AllSong />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin-home/add-playlist"
-          element={
-            <ProtectedRoute>
-              <AddPlaylist />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin-home/all-playlists"
-          element={
-            <ProtectedRoute>
-              <AllPlaylists />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin-home/playlist/:id"
-          element={
-            <ProtectedRoute>
-              <PlaylistDetails />
-            </ProtectedRoute>
-          }
-        />
-      </Routes>
-    </BrowserRouter>
+
+          <Route
+            path="/admin-home"
+            element={
+              <ProtectedRoute>
+                <Admin_Home />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin-home/add-song"
+            element={
+              <ProtectedRoute>
+                <AddSong />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin-home/all-song"
+            element={
+              <ProtectedRoute>
+                <AllSong />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin-home/add-playlist"
+            element={
+              <ProtectedRoute>
+                <AddPlaylist />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin-home/all-playlists"
+            element={
+              <ProtectedRoute>
+                <AllPlaylists />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin-home/playlist/:id"
+            element={
+              <ProtectedRoute>
+                <PlaylistDetails />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
+        <MusicPlayer />
+      </BrowserRouter>
+    </PlayerProvider>
   );
 };
 
