@@ -57,9 +57,18 @@ const MusicPlayer = () => {
     };
 
     const location = useLocation();
-    const hidePlayerRoutes = ['/login', '/signup', '/forgot-password', '/verify-otp', '/reset-password', '/admin-login'];
+    const hidePlayerRoutes = [
+        '/login',
+        '/signup',
+        '/forgot-password',
+        '/verify-otp',
+        '/reset-password',
+        '/admin-login'
+    ];
 
-    if (hidePlayerRoutes.includes(location.pathname)) return null;
+    const isAdminPage = location.pathname.startsWith('/admin');
+
+    if (hidePlayerRoutes.includes(location.pathname) || isAdminPage) return null;
 
     return (
         <div className="fixed bottom-0 left-0 right-0 bg-black border-t border-white/10 px-4 py-3 z-50 flex items-center justify-between h-20">
