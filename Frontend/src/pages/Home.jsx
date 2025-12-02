@@ -207,7 +207,7 @@ export default function UserHomePage() {
       </nav>
 
       {/* Main Content */}
-      <main className="relative z-10 pt-24 pb-12 px-6 max-w-7xl mx-auto">
+      <main className="relative z-10 pt-24 pb-32 px-6 max-w-7xl mx-auto">
         {/* Welcome Section */}
         <div className="mb-10">
           <h2 className="text-3xl md:text-4xl font-bold mb-2">
