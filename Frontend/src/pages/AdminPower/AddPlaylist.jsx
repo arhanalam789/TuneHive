@@ -110,7 +110,6 @@ export default function AddPlaylist() {
 
   return (
     <div className="min-h-screen bg-black">
-      {/* Header */}
       <header className="border-b border-neutral-800 bg-black/50 backdrop-blur-sm sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -133,7 +132,7 @@ export default function AddPlaylist() {
       </header>
 
       <main className="max-w-7xl mx-auto px-6 py-12">
-        {/* Title */}
+ 
         <div className="mb-10">
           <h2 className="text-white text-4xl font-bold mb-3">Create Playlist</h2>
           <p className="text-neutral-400 text-lg">
@@ -142,9 +141,9 @@ export default function AddPlaylist() {
         </div>
 
         <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left: playlist info + song selection */}
+    
           <div className="lg:col-span-2 space-y-6">
-            {/* Playlist info */}
+
             <div className="rounded-2xl border border-neutral-800 bg-gradient-to-br from-neutral-900 to-black p-8">
               <div className="space-y-6">
                 <div>
@@ -175,7 +174,6 @@ export default function AddPlaylist() {
               </div>
             </div>
 
-            {/* Song selection */}
             <div className="rounded-2xl border border-neutral-800 bg-gradient-to-br from-neutral-900 to-black p-8">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
@@ -192,7 +190,7 @@ export default function AddPlaylist() {
                 </div>
               </div>
 
-              {/* Search bar */}
+   
               <div className="relative mb-4">
                 <Search className="w-4 h-4 text-neutral-500 absolute left-3 top-3" />
                 <input
@@ -204,7 +202,7 @@ export default function AddPlaylist() {
                 />
               </div>
 
-              {/* Songs list */}
+
               <div className="max-h-72 overflow-y-auto space-y-2 pr-1">
                 {filteredSongs.length === 0 && (
                   <p className="text-neutral-500 text-sm">No songs found.</p>
@@ -247,7 +245,7 @@ export default function AddPlaylist() {
             </div>
           </div>
 
-          {/* Right: Cover image */}
+
           <div className="rounded-2xl border border-neutral-800 bg-gradient-to-br from-neutral-900 to-black p-8 h-full">
             <label className="block text-white text-sm font-medium mb-4">
               Playlist Cover
@@ -296,7 +294,7 @@ export default function AddPlaylist() {
               </label>
             )}
 
-            {/* Submit button */}
+  
             <button
               type="submit"
               disabled={isSubmitting}

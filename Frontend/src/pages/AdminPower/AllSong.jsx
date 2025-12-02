@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { Music, Disc, Loader2, ArrowLeft, Play, Trash2, Edit } from "lucide-react";
+import { Music, Disc, Loader2, ArrowLeft, Play, Trash2, Edit, ArrowUpDown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
@@ -10,9 +10,10 @@ export default function AllSongs() {
   const [loading, setLoading] = useState(true);
 
   const [search, setSearch] = useState("");
-  const [filteredSongs, setFilteredSongs] = useState([]);
+  const [sort, setSort] = useState("newest");
 
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const songsPerPage = 8;
 
   const [editModal, setEditModal] = useState(false);
@@ -20,49 +21,58 @@ export default function AllSongs() {
 
   const API_URL = import.meta.env.VITE_API_URL || "https://tunehive-nw51.onrender.com";
 
-  useEffect(() => {
-    const fetchSongs = async () => {
-      try {
-        const res = await axios.get(`${API_URL}/api/adminpower/all-songs`, {
-          withCredentials: true
-        });
-        setSongs(res.data.songs);
-        setFilteredSongs(res.data.songs);
-      } catch {
-        toast.error("Failed to load songs");
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchSongs = async () => {
+    setLoading(true);
+    try {
+      const res = await axios.get(`${API_URL}/api/adminpower/all-songs`, {
+        params: {
+          page: currentPage,
+          limit: songsPerPage,
+          search: search,
+          sort: sort
+        },
+        withCredentials: true
+      });
 
-    fetchSongs();
-  }, []);
+      if (res.data.success) {
+        setSongs(res.data.songs);
+        setTotalPages(res.data.totalPages);
+      }
+    } catch {
+      toast.error("Failed to load songs");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      fetchSongs();
+    }, 500); 
+
+    return () => clearTimeout(timeoutId);
+  }, [currentPage, search, sort]);
 
   const handleSearch = (v) => {
     setSearch(v);
-    const f = songs.filter((s) =>
-      s.title.toLowerCase().includes(v.toLowerCase()) ||
-      s.artist.toLowerCase().includes(v.toLowerCase()) ||
-      (s.album || "").toLowerCase().includes(v.toLowerCase())
-    );
-    setFilteredSongs(f);
     setCurrentPage(1);
   };
 
-  const indexOfLast = currentPage * songsPerPage;
-  const currentSongs = filteredSongs.slice(indexOfLast - songsPerPage, indexOfLast);
-  const totalPages = Math.ceil(filteredSongs.length / songsPerPage);
+  const handleSortChange = (e) => {
+    setSort(e.target.value);
+    setCurrentPage(1);
+  };
 
   const deleteSong = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this song?")) return;
+
     try {
       const res = await axios.delete(`${API_URL}/api/adminpower/delete-song/${id}`, {
         withCredentials: true
       });
       if (res.data.success) {
-        const u = songs.filter((s) => s._id !== id);
-        setSongs(u);
-        setFilteredSongs(u);
         toast.success("Song deleted");
+        fetchSongs(); // Refresh list after delete
       }
     } catch {
       toast.error("Delete failed");
@@ -88,13 +98,9 @@ export default function AllSongs() {
       );
 
       if (res.data.success) {
-        const updated = songs.map((s) =>
-          s._id === editData.id ? { ...s, ...editData } : s
-        );
-        setSongs(updated);
-        setFilteredSongs(updated);
         toast.success("Updated");
         setEditModal(false);
+        fetchSongs(); 
       }
     } catch {
       toast.error("Update failed");
@@ -126,7 +132,25 @@ export default function AllSongs() {
 
       <main className="max-w-7xl mx-auto px-6 py-12">
 
-        <h2 className="text-white text-4xl font-bold mb-6">All Songs</h2>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+          <h2 className="text-white text-4xl font-bold">All Songs</h2>
+
+          <div className="flex items-center gap-4">
+            <div className="relative">
+              <select
+                value={sort}
+                onChange={handleSortChange}
+                className="appearance-none bg-neutral-900 border border-neutral-700 text-white px-4 py-3 pr-10 rounded-xl outline-none focus:border-purple-500 cursor-pointer"
+              >
+                <option value="newest">Newest First</option>
+                <option value="oldest">Oldest First</option>
+                <option value="a-z">A-Z</option>
+                <option value="z-a">Z-A</option>
+              </select>
+              <ArrowUpDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none" />
+            </div>
+          </div>
+        </div>
 
         <input
           type="text"
@@ -142,73 +166,81 @@ export default function AllSongs() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-8">
-              {currentSongs.map((song) => (
-                <div
-                  key={song._id}
-                  className="rounded-2xl border border-neutral-800 bg-neutral-900/60 p-4 hover:border-purple-500/40 hover:shadow-purple-500/10 shadow-xl transition-all relative"
-                >
-                  <div className="absolute top-4 right-4 flex gap-2">
-                    <button
-                      onClick={() => openEdit(song)}
-                      className="p-2 rounded-full bg-neutral-800 hover:bg-purple-600 transition"
-                    >
-                      <Edit className="text-white w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={() => deleteSong(song._id)}
-                      className="p-2 rounded-full bg-neutral-800 hover:bg-red-600 transition"
-                    >
-                      <Trash2 className="text-white w-4 h-4" />
-                    </button>
-                  </div>
-
-                  <div className="aspect-square rounded-xl overflow-hidden mb-4">
-                    <img
-                      src={song.imageurl}
-                      alt={song.title}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-
-                  <h3 className="text-white font-semibold text-lg truncate">{song.title}</h3>
-                  <p className="text-neutral-400 text-sm truncate">{song.artist}</p>
-                  <p className="text-neutral-600 text-xs truncate mb-4">
-                    {song.album || "No Album"}
-                  </p>
-
-                  <audio
-                    controls
-                    className="w-full h-10 rounded-lg"
-                    style={{ filter: "invert(1) hue-rotate(180deg)" }}
+            {songs.length === 0 ? (
+              <div className="text-center py-20 text-neutral-500">
+                No songs found.
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-8">
+                {songs.map((song) => (
+                  <div
+                    key={song._id}
+                    className="rounded-2xl border border-neutral-800 bg-neutral-900/60 p-4 hover:border-purple-500/40 hover:shadow-purple-500/10 shadow-xl transition-all relative"
                   >
-                    <source src={song.songurl} type="audio/mpeg" />
-                  </audio>
-                </div>
-              ))}
-            </div>
+                    <div className="absolute top-4 right-4 flex gap-2 z-10">
+                      <button
+                        onClick={() => openEdit(song)}
+                        className="p-2 rounded-full bg-neutral-800 hover:bg-purple-600 transition"
+                      >
+                        <Edit className="text-white w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => deleteSong(song._id)}
+                        className="p-2 rounded-full bg-neutral-800 hover:bg-red-600 transition"
+                      >
+                        <Trash2 className="text-white w-4 h-4" />
+                      </button>
+                    </div>
 
-            <div className="flex items-center justify-center gap-6 mt-10">
-              <button
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage((p) => p - 1)}
-                className="px-4 py-2 bg-neutral-900 text-white rounded-lg disabled:opacity-30"
-              >
-                Prev
-              </button>
+                    <div className="aspect-square rounded-xl overflow-hidden mb-4">
+                      <img
+                        src={song.imageurl}
+                        alt={song.title}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
 
-              <span className="text-neutral-400">
-                Page {currentPage} of {totalPages}
-              </span>
+                    <h3 className="text-white font-semibold text-lg truncate">{song.title}</h3>
+                    <p className="text-neutral-400 text-sm truncate">{song.artist}</p>
+                    <p className="text-neutral-600 text-xs truncate mb-4">
+                      {song.album || "No Album"}
+                    </p>
 
-              <button
-                disabled={currentPage === totalPages}
-                onClick={() => setCurrentPage((p) => p + 1)}
-                className="px-4 py-2 bg-neutral-900 text-white rounded-lg disabled:opacity-30"
-              >
-                Next
-              </button>
-            </div>
+                    <audio
+                      controls
+                      className="w-full h-10 rounded-lg"
+                      style={{ filter: "invert(1) hue-rotate(180deg)" }}
+                    >
+                      <source src={song.songurl} type="audio/mpeg" />
+                    </audio>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-6 mt-10">
+                <button
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage((p) => p - 1)}
+                  className="px-4 py-2 bg-neutral-900 text-white rounded-lg disabled:opacity-30 hover:bg-neutral-800 transition"
+                >
+                  Prev
+                </button>
+
+                <span className="text-neutral-400">
+                  Page {currentPage} of {totalPages}
+                </span>
+
+                <button
+                  disabled={currentPage === totalPages}
+                  onClick={() => setCurrentPage((p) => p + 1)}
+                  className="px-4 py-2 bg-neutral-900 text-white rounded-lg disabled:opacity-30 hover:bg-neutral-800 transition"
+                >
+                  Next
+                </button>
+              </div>
+            )}
           </>
         )}
       </main>
@@ -219,19 +251,19 @@ export default function AllSongs() {
             <h3 className="text-white text-xl font-semibold mb-4">Edit Song</h3>
 
             <input
-              className="w-full bg-neutral-800 text-white px-3 py-2 rounded mb-3"
+              className="w-full bg-neutral-800 text-white px-3 py-2 rounded mb-3 outline-none focus:border-purple-500 border border-transparent"
               value={editData.title}
               onChange={(e) => setEditData({ ...editData, title: e.target.value })}
               placeholder="Title"
             />
             <input
-              className="w-full bg-neutral-800 text-white px-3 py-2 rounded mb-3"
+              className="w-full bg-neutral-800 text-white px-3 py-2 rounded mb-3 outline-none focus:border-purple-500 border border-transparent"
               value={editData.artist}
               onChange={(e) => setEditData({ ...editData, artist: e.target.value })}
               placeholder="Artist"
             />
             <input
-              className="w-full bg-neutral-800 text-white px-3 py-2 rounded mb-5"
+              className="w-full bg-neutral-800 text-white px-3 py-2 rounded mb-5 outline-none focus:border-purple-500 border border-transparent"
               value={editData.album}
               onChange={(e) => setEditData({ ...editData, album: e.target.value })}
               placeholder="Album"
@@ -240,13 +272,13 @@ export default function AllSongs() {
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setEditModal(false)}
-                className="px-4 py-2 bg-neutral-700 text-white rounded-lg"
+                className="px-4 py-2 bg-neutral-700 text-white rounded-lg hover:bg-neutral-600 transition"
               >
                 Cancel
               </button>
               <button
                 onClick={updateSong}
-                className="px-4 py-2 bg-purple-600 text-white rounded-lg"
+                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-500 transition"
               >
                 Update
               </button>

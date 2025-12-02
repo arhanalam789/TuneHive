@@ -4,7 +4,8 @@ import experss from 'express';
 const router = experss.Router();
 
 import { addSong,getAllSongs,addPlaylist,getAllPlaylists,getPlaylistById,updatePlaylistSongs,deleteSong,editSong ,getDashboardStats,updatePlaylistDetails,deletePlaylist} from '../controllers/adminPowerController.js';
-import upload from '../middleware/multerConfig.js';
+// import upload from '../middleware/multerConfig.js';
+import upload from '../config/multerConfig.js';
 
 router.post(
     "/upload-song",

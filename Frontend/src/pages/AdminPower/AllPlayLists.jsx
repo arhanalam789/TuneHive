@@ -1,57 +1,65 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { ListMusic, Loader2, ArrowLeft } from "lucide-react";
+import { ListMusic, Loader2, ArrowLeft, ArrowUpDown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
 export default function AllPlaylists() {
   const navigate = useNavigate();
   const [playlists, setPlaylists] = useState([]);
-  const [filtered, setFiltered] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const [search, setSearch] = useState("");
+  const [sort, setSort] = useState("newest");
   const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const perPage = 6;
 
   const API_URL = import.meta.env.VITE_API_URL || "https://tunehive-nw51.onrender.com";
 
-  useEffect(() => {
-    const fetchPlaylists = async () => {
-      try {
-        const res = await axios.get(`${API_URL}/api/adminpower/all-playlists`, {
-          withCredentials: true,
-        });
-        if (res.data.success) {
-          setPlaylists(res.data.playlists);
-          setFiltered(res.data.playlists);
-        } else toast.error("Failed to fetch playlists");
-      } catch (error) {
-        if (error.response?.status === 401) {
-          toast.error("Unauthorized! Please login again");
-          setTimeout(() => navigate("/admin-login"), 1500);
-        } else toast.error("Failed to load playlists");
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchPlaylists = async () => {
+    setLoading(true);
+    try {
+      const res = await axios.get(`${API_URL}/api/adminpower/all-playlists`, {
+        params: {
+          page: currentPage,
+          limit: perPage,
+          search: search,
+          sort: sort
+        },
+        withCredentials: true,
+      });
+      if (res.data.success) {
+        setPlaylists(res.data.playlists);
+        setTotalPages(res.data.totalPages);
+      } else toast.error("Failed to fetch playlists");
+    } catch (error) {
+      if (error.response?.status === 401) {
+        toast.error("Unauthorized! Please login again");
+        setTimeout(() => navigate("/admin-login"), 1500);
+      } else toast.error("Failed to load playlists");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    fetchPlaylists();
-  }, []);
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      fetchPlaylists();
+    }, 500);
+
+    return () => clearTimeout(timeoutId);
+  }, [currentPage, search, sort]);
 
   const handleSearch = (v) => {
     setSearch(v);
-    const f = playlists.filter((p) =>
-      p.title.toLowerCase().includes(v.toLowerCase()) ||
-      (p.description || "").toLowerCase().includes(v.toLowerCase())
-    );
-    setFiltered(f);
     setCurrentPage(1);
   };
 
-  const indexOfLast = currentPage * perPage;
-  const currentPlaylists = filtered.slice(indexOfLast - perPage, indexOfLast);
-  const totalPages = Math.ceil(filtered.length / perPage);
+  const handleSortChange = (e) => {
+    setSort(e.target.value);
+    setCurrentPage(1);
+  };
 
   return (
     <div className="min-h-screen bg-black">
@@ -75,8 +83,26 @@ export default function AllPlaylists() {
       </header>
 
       <main className="max-w-7xl mx-auto px-6 py-12">
-        <h2 className="text-white text-4xl font-bold mb-3">All Playlists</h2>
-        <p className="text-neutral-400 text-lg mb-8">Manage and view your playlists</p>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+          <div>
+            <h2 className="text-white text-4xl font-bold mb-3">All Playlists</h2>
+            <p className="text-neutral-400 text-lg">Manage and view your playlists</p>
+          </div>
+
+          <div className="relative">
+            <select
+              value={sort}
+              onChange={handleSortChange}
+              className="appearance-none bg-neutral-900 border border-neutral-700 text-white px-4 py-3 pr-10 rounded-xl outline-none focus:border-purple-500 cursor-pointer"
+            >
+              <option value="newest">Newest First</option>
+              <option value="oldest">Oldest First</option>
+              <option value="a-z">A-Z</option>
+              <option value="z-a">Z-A</option>
+            </select>
+            <ArrowUpDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400 pointer-events-none" />
+          </div>
+        </div>
 
         <input
           type="text"
@@ -91,7 +117,7 @@ export default function AllPlaylists() {
             <Loader2 className="w-12 h-12 text-purple-500 animate-spin mb-4" />
             <p className="text-neutral-400">Loading playlists...</p>
           </div>
-        ) : filtered.length === 0 ? (
+        ) : playlists.length === 0 ? (
           <div className="rounded-2xl border border-neutral-800 bg-neutral-900/60 p-16 text-center">
             <div className="w-20 h-20 rounded-xl bg-purple-600/10 border border-purple-500/20 flex items-center justify-center mx-auto mb-6">
               <ListMusic className="w-10 h-10 text-purple-400" />
@@ -102,7 +128,7 @@ export default function AllPlaylists() {
         ) : (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {currentPlaylists.map((playlist) => (
+              {playlists.map((playlist) => (
                 <div
                   key={playlist._id}
                   onClick={() => navigate(`/admin-home/playlist/${playlist._id}`)}
@@ -146,27 +172,29 @@ export default function AllPlaylists() {
               ))}
             </div>
 
-            <div className="flex items-center justify-center gap-6 mt-10">
-              <button
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage((p) => p - 1)}
-                className="px-4 py-2 bg-neutral-900 text-white rounded-lg disabled:opacity-30"
-              >
-                Prev
-              </button>
+            {totalPages > 1 && (
+              <div className="flex items-center justify-center gap-6 mt-10">
+                <button
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage((p) => p - 1)}
+                  className="px-4 py-2 bg-neutral-900 text-white rounded-lg disabled:opacity-30 hover:bg-neutral-800 transition"
+                >
+                  Prev
+                </button>
 
-              <span className="text-neutral-400">
-                Page {currentPage} of {totalPages}
-              </span>
+                <span className="text-neutral-400">
+                  Page {currentPage} of {totalPages}
+                </span>
 
-              <button
-                disabled={currentPage === totalPages}
-                onClick={() => setCurrentPage((p) => p + 1)}
-                className="px-4 py-2 bg-neutral-900 text-white rounded-lg disabled:opacity-30"
-              >
-                Next
-              </button>
-            </div>
+                <button
+                  disabled={currentPage === totalPages}
+                  onClick={() => setCurrentPage((p) => p + 1)}
+                  className="px-4 py-2 bg-neutral-900 text-white rounded-lg disabled:opacity-30 hover:bg-neutral-800 transition"
+                >
+                  Next
+                </button>
+              </div>
+            )}
           </>
         )}
       </main>

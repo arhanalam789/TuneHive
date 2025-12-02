@@ -186,13 +186,35 @@ export const addPlaylist = async (req, res) => {
 
 export const getAllPlaylists = async (req, res) => {
   try {
-    const playlists = await Playlist.find()
-      .populate("songs") 
-      .sort({ createdAt: -1 });
+    const { page = 1, limit = 10, search = '', sort = 'newest' } = req.query;
+
+    const query = {};
+    if (search) {
+      query.$or = [
+        { title: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } }
+      ];
+    }
+
+    let sortOption = { createdAt: -1 };
+    if (sort === 'oldest') sortOption = { createdAt: 1 };
+    if (sort === 'a-z') sortOption = { title: 1 };
+    if (sort === 'z-a') sortOption = { title: -1 };
+
+    const playlists = await Playlist.find(query)
+      .populate("songs")
+      .sort(sortOption)
+      .limit(limit * 1)
+      .skip((page - 1) * limit);
+
+    const count = await Playlist.countDocuments(query);
 
     return res.status(200).json({
       success: true,
       playlists,
+      totalPages: Math.ceil(count / limit),
+      currentPage: page,
+      totalPlaylists: count
     });
   } catch (error) {
     console.error("❌ Error fetching playlists:", error);
@@ -234,7 +256,7 @@ export const getPlaylistById = async (req, res) => {
 export const updatePlaylistSongs = async (req, res) => {
   try {
     const { id } = req.params;
-    const { songs } = req.body; 
+    const { songs } = req.body;
 
     if (!Array.isArray(songs)) {
       return res.status(400).json({
